@@ -3,6 +3,36 @@ from tkinter import ttk, scrolledtext, messagebox, filedialog
 import winreg
 import os
 import ipaddress
+from pprint import pprint
+import sys
+
+
+class Debug:
+    """
+    调试信息控制类，包装pprint方法进行格式化输出
+
+    类属性:
+        is_debug (bool): 控制调试模式开关，True时输出调试信息
+
+    方法:
+        print(*args, **kwargs): 当is_debug为True时，调用pprint.pprint输出内容
+    """
+    is_debug = False
+
+    @classmethod
+    def print(cls, *args, **kwargs):
+        """
+        调试信息打印方法，当is_debug=True时实际执行打印
+
+        参数:
+            *args: 任意位置参数，传递给pprint.pprint
+            **kwargs: 任意关键字参数，传递给pprint.pprint
+        """
+        if cls.is_debug:
+            pprint(*args, **kwargs)
+            sys.stdout.flush()
+
+
 
 class FirewallExporterApp:
     def __init__(self, root):
@@ -142,6 +172,7 @@ class FirewallExporterApp:
         ra4_list = []
         la4_list = []
         fields = rule_data.split('|')
+        Debug.print(fields)
         
         for field in fields:
             if '=' not in field:
@@ -168,9 +199,10 @@ class FirewallExporterApp:
         protocol = params.get('protocol', 'any')
         cmd_params['protocol'] = protocol_map.get(protocol, protocol.lower())
         
-        if local_ports := params.get('localports'):
+        if local_ports := params.get('lport'):
             cmd_params['localport'] = local_ports.replace(' ', '')
-        if remote_ports := params.get('remoteports'):
+            Debug.print(cmd_params)
+        if remote_ports := params.get('rport'):
             cmd_params['remoteport'] = remote_ports.replace(' ', '')
         
         if app_path := params.get('app'):
@@ -211,6 +243,7 @@ class FirewallExporterApp:
         return cmd
 
 if __name__ == '__main__':
+    Debug.is_debug = False
     root = tk.Tk()
     app = FirewallExporterApp(root)
     root.mainloop()
